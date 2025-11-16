@@ -65,56 +65,45 @@ def read_DGH(DGH_file: str):
     Args:
         DGH_file (str): the path to DGH file.
     """
-    tree = {}  # node -> list of children
-    parent = {}  # node -> parent node
-    depth = {}  # node -> depth level
+    tree = {}  
+    parent = {}  
+    depth = {}  
     root = None
     
     with open(DGH_file) as f:
         lines = f.readlines()
         
-    # Stack to keep track of the most recent node at each depth level
     stack = []
     
     for line in lines:
-        # Count leading tabs to determine depth
         level = 0
         while level < len(line) and line[level] == '\t':
             level += 1
         
-        # Extract the node value (strip tabs and whitespace)
         node = line.strip()
         
-        if not node:  # Skip empty lines
+        if not node:  
             continue
         
-        # Initialize this node in the tree
         tree[node] = []
         depth[node] = level
         
         if level == 0:
-            # This is the root node
             root = node
             parent[node] = None
             stack = [node]
         else:
-            # Adjust stack to current level
             stack = stack[:level]
             
-            # The parent is the last node at level-1
             parent_node = stack[-1]
             parent[node] = parent_node
             
-            # Add this node as a child of its parent
             tree[parent_node].append(node)
             
-            # Add this node to the stack
             stack.append(node)
     
-    # Pre-calculate total number of leaf nodes
     num_leaves = sum(1 for children in tree.values() if len(children) == 0)
     
-    # Pre-calculate leaf descendants for each node
     leaf_descendants = {}
     
     def get_leaf_descendants_for_node(node):
@@ -123,7 +112,7 @@ def read_DGH(DGH_file: str):
             return leaf_descendants[node]
         
         leaves = set()
-        if len(tree[node]) == 0:  # It's a leaf
+        if len(tree[node]) == 0:  
             leaves.add(node)
         else:
             for child in tree[node]:
@@ -132,7 +121,6 @@ def read_DGH(DGH_file: str):
         leaf_descendants[node] = leaves
         return leaves
     
-    # Calculate for all nodes starting from root
     for node in tree.keys():
         get_leaf_descendants_for_node(node)
     
@@ -180,7 +168,6 @@ def find_common_ancestor(values, dgh, cache=None):
     if len(values) == 0:
         return dgh['root']
     
-    # If all values are the same, return that value
     unique_values = set(values)
     if len(unique_values) == 1:
         return list(unique_values)[0]
@@ -190,13 +177,11 @@ def find_common_ancestor(values, dgh, cache=None):
         if cache_key in cache:
             return cache[cache_key]
     
-    # Get ancestors for all values
     all_ancestors = []
     for value in unique_values:
         ancestors = get_ancestors(value, dgh)
         all_ancestors.append(set(ancestors))
     
-    # Find common ancestors
     common = all_ancestors[0]
     for ancestor_set in all_ancestors[1:]:
         common = common.intersection(ancestor_set)
@@ -204,7 +189,6 @@ def find_common_ancestor(values, dgh, cache=None):
     if len(common) == 0:
         return dgh['root']
     
-    # Find the common ancestor with maximum depth
     max_depth = -1
     lca = dgh['root']
     for ancestor in common:
@@ -212,7 +196,6 @@ def find_common_ancestor(values, dgh, cache=None):
             max_depth = dgh['depth'][ancestor]
             lca = ancestor
     
-    # Store result in cache before returning
     if cache is not None:
         cache_key = frozenset(unique_values)
         cache[cache_key] = lca
@@ -224,12 +207,10 @@ def generalize_cluster(cluster, DGHs):
     """Generalize all QI attributes in a cluster to achieve k-anonymity."""
     for attribute in DGHs.keys():
         
-        # Find the minimal common ancestor
         values = [record[attribute] for record in cluster]        
         dgh = DGHs[attribute]
         lca = find_common_ancestor(values, dgh)
         
-        # Replace all records with the LCA
         for record in cluster:
             record[attribute] = lca
     
@@ -345,7 +326,6 @@ def get_possible_specializations(node, DGHs, k, raw_dataset):
     return candidates
 
 
-
 def select_best_specialization(candidates):
     if len(candidates) == 0:
         return None
@@ -376,7 +356,6 @@ def select_best_specialization(candidates):
     return best
 
 
-
 def split_node(node, specialization):
     attribute = specialization['attribute']
     nonempty_groups = specialization['nonempty']
@@ -397,7 +376,7 @@ def specialize_node(node, DGHs, k, raw_dataset):
     candidates = get_possible_specializations(node, DGHs, k, raw_dataset)
     
     if len(candidates) == 0:
-        return  # No valid specialization
+        return  
     
     best_spec = select_best_specialization(candidates)
     if best_spec is None:
@@ -673,6 +652,8 @@ def topdown_anonymizer(raw_dataset_file: str, DGH_folder: str, k: int,
     raw_dataset = read_dataset(raw_dataset_file)
     DGHs = read_DGHs(DGH_folder)
     
+    ################### Start of my code. ###################
+    
     # Create root node (all maximally generalized)
     root = create_root_node(raw_dataset, DGHs)
     
@@ -681,6 +662,8 @@ def topdown_anonymizer(raw_dataset_file: str, DGH_folder: str, k: int,
     
     # Apply generalizations to dataset
     anonymized_dataset = apply_generalizations_to_dataset(raw_dataset, root, DGHs)
+    
+    ################### End of my code. ###################
 
     write_dataset(anonymized_dataset, output_file)
 
