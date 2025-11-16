@@ -530,6 +530,7 @@ def random_anonymizer(raw_dataset_file: str, DGH_folder: str, k: int,
     raw_dataset = np.array(raw_dataset)
     np.random.seed(s) ## to ensure consistency between runs
     np.random.shuffle(raw_dataset)  ##shuffle the dataset to randomize
+    
     clusters = []
 
     D = len(raw_dataset)
@@ -579,6 +580,8 @@ def clustering_anonymizer(raw_dataset_file: str, DGH_folder: str, k: int,
     """
     raw_dataset = read_dataset(raw_dataset_file)
     DGHs = read_DGHs(DGH_folder)
+    
+    anonymized_dataset = []
     
     ################### Start of my code. ###################
 
@@ -651,6 +654,8 @@ def topdown_anonymizer(raw_dataset_file: str, DGH_folder: str, k: int,
     """
     raw_dataset = read_dataset(raw_dataset_file)
     DGHs = read_DGHs(DGH_folder)
+    
+    anonymized_dataset = []
     
     ################### Start of my code. ###################
     
