@@ -1,0 +1,5 @@
+Any
+	In-family
+	Not-in-family
+	Other-relative
+	Unmarried

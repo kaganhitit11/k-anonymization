@@ -1,0 +1,14 @@
+Any
+	Government
+		State-gov
+		Local-gov
+		Federal-gov
+	Private
+		Privy-small-business
+		Privy-corporate
+	Self-employed
+		Self-emp-not-inc
+		Self-emp-inc
+	Unemployed
+		Without-pay
+		Never-worked
